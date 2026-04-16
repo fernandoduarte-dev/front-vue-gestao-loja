@@ -40,7 +40,7 @@ export default {
   top: 0;
   z-index: 1000;
 
-  background: #0d6efd;
+  background: #5e3291;
   color: white;
 
   padding: 12px 20px;

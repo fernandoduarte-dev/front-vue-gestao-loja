@@ -2,27 +2,36 @@
   <div class="d-flex">
 
     <!-- Sidebar -->
-    <div class="sidebar bg-dark text-white p-3">
-      <h4 class="mb-4">SGS</h4>
+    <div class="sidebar bg-custom text-white p-3">
+      
+      <div class="text-center mb-4">
+        <img src="../assets/logo-branca.png" class="sidebar-logo mb-2" />
+          
+      </div>
 
       <ul class="nav flex-column">
         <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/home">🏠 Início</router-link>
+          <router-link class="nav-link text-white" to="/home">Início</router-link>
         </li>
         <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/usuarios">👤 Usuários</router-link>
+          <router-link class="nav-link text-white" to="/usuarios">Usuário</router-link>
         </li>
         <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/pedidos">📦 Pedidos</router-link>
+          <router-link class="nav-link text-white" to="/pedidos">Pedido</router-link>
         </li>
         <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/estoque">📊 Estoque</router-link>
+          <router-link class="nav-link text-white" to="/estoque">Estoque</router-link>
         </li>
+        <li class="nav-item mb-2">
+          <router-link class="nav-link text-white" to="/Clientes">Cliente</router-link>
+        </li>
+        <li class="nav-item mb-2">
+          <router-link class="nav-link text-white" to="/Produto">Produto</router-link>
+        </li>
+        
       </ul>
 
-      <button class="btn btn-danger mt-4 w-100" @click="logout">
-        Sair
-      </button>
+      
     </div>
 
     <!-- Conteúdo -->
@@ -30,9 +39,23 @@
 
       <!-- Topo -->
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dashboard</h2>
-        <span class="text-muted">Bem-vindo 👋</span>
-      </div>
+
+ 
+
+
+  <div class="d-flex align-items-center gap-2">
+
+    <span class="text-muted">
+      Olá, usuário 👋
+    </span>
+
+    <button class="btn btn-outline-danger btn-sm" @click="logout">
+      Sair
+    </button>
+
+  </div>
+
+</div>
 
       <!-- Cards -->
       <div class="row">
@@ -78,6 +101,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style scoped>
@@ -91,6 +115,17 @@ export default {
 }
 
 .nav-link:hover {
-  background-color: #495057;
+  background-color: #000000;
 }
+
+.sidebar-logo {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+.bg-custom {
+  background-color: #5e3291; 
+}
+
 </style>
