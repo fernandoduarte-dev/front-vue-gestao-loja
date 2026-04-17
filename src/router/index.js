@@ -6,6 +6,12 @@ import Usuarios from '../views/UsuariosPage.vue'
 import CadastroUsuario from '../views/CadastroUsuario.vue'
 import Clientes from '../views/Clientes.vue'
 import CadastroCliente from '../views/CadastroCliente.vue'
+import ProdutosPage from '../views/ProdutosPage.vue'
+import CadastroProduto from '../views/CadastroProduto.vue'
+import EstoquePage from '@/views/EstoquePage.vue'
+import MovimentoEstoque from '@/views/MovimentoEstoque.vue'
+import HistoricoEstoquePage from '@/views/HistoricoEstoquePage.vue'
+
 
 
 const routes = [
@@ -19,7 +25,17 @@ const routes = [
 
   { path: '/clientes', component: Clientes, meta: { requiresAuth: true } },
 
-  { path: '/clientes/novo', component: CadastroCliente, meta:{ requiresAuth: true } }
+  { path: '/clientes/novo', component: CadastroCliente, meta:{ requiresAuth: true } },
+
+  { path: '/produtos', component: ProdutosPage, meta: { requiresAuth: true } },
+
+  { path: '/produtos/novo', component: CadastroProduto, meta: { requiresAuth: true }},
+
+  { path: '/estoque', component: EstoquePage, meta: { requiresAuth: true }},
+
+  { path: '/estoque/movimento', component: MovimentoEstoque, meta: { requiresAuth: true }},
+
+  { path: '/estoque/movimento/historico', component: HistoricoEstoquePage, meta: { requiresAuth: true }}
 ]
 
 const router = createRouter({

@@ -10,24 +10,32 @@
       </div>
 
       <ul class="nav flex-column">
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/home">Início</router-link>
-        </li>
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/usuarios">Usuário</router-link>
-        </li>
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/pedidos">Pedido</router-link>
-        </li>
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/estoque">Estoque</router-link>
-        </li>
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/Clientes">Cliente</router-link>
-        </li>
-        <li class="nav-item mb-2">
-          <router-link class="nav-link text-white" to="/Produto">Produto</router-link>
-        </li>
+        <ul class="nav flex-column">
+  <li class="nav-item mb-2">
+    <router-link class="nav-link text-white" to="/home">Início</router-link>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/usuarios')">Usuário</a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/pedidos')">Pedido</a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/estoque')">Estoque</a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/clientes')">Cliente</a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/produtos')">Produto</a>
+  </li>
+  
+</ul>
         
       </ul>
 
@@ -98,10 +106,14 @@ export default {
     logout() {
       localStorage.removeItem('token')
       this.$router.push('/')
+    },
+
+    abrirNovaAba(path) {
+      const route = this.$router.resolve(path)
+      window.open(route.href, '_blank')
     }
   }
 }
-
 </script>
 
 <style scoped>

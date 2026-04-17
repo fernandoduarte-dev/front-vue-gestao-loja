@@ -9,13 +9,21 @@
     <!-- ROTAS -->
     <router-view />
 
+    <!-- TOAST GLOBAL -->
+    <AppToast />
+
   </div>
 </template>
 
 <script>
 import LoadingStore from '@/store/loading'
+import AppToast from "@/components/AppToast.vue"
 
 export default {
+  components: {
+    AppToast
+  },
+
   computed: {
     loading() {
       return LoadingStore.loading

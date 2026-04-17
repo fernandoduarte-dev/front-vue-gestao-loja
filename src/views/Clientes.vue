@@ -40,7 +40,7 @@
 
     <!-- 📋 TABELA -->
     <div v-if="clientes.length">
-      <table class="table table-striped">
+      <table class="table table-striped text-center align-middle">
         <thead>
           <tr>
             <th>Nome</th>
