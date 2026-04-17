@@ -67,13 +67,7 @@
                 Voltar
               </button>
 
-              <button
-                class="btn btn-outline-primary px-4"
-                @click="irParaHistorico"
-                
-              >
-                Histórico
-              </button>
+        
 
             </div>
 
@@ -174,11 +168,6 @@ export default {
 
     voltar() {
       this.$router.push("/estoque")
-    },
-
-    irParaHistorico() {
-      this.$router.push("/estoque/movimento/historico")
-    
     },
 
     resetForm() {

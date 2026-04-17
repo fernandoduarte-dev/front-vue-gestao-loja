@@ -5,12 +5,12 @@
     <div class="container mb-4">
       <div class="row justify-content-center mb-3">
 
-        <!-- SKU -->
+        <!-- Código Produto -->
         <div class="col-md-3">
           <input
-            v-model="filtroSku"
+            v-model="filtroId"
             class="form-control text-center"
-            placeholder="SKU"
+            placeholder="Código Produto"
           />
         </div>
 
@@ -20,6 +20,22 @@
             <option value="">Tamanho</option>
             <option v-for="t in tamanhos" :key="t">{{ t }}</option>
           </select>
+        </div>
+
+        <div class="col-md-3">
+          <input
+            v-model="filtroTecido"
+            class="form-control text-center"
+            placeholder="Tecido"
+           />
+        </div>
+
+        <div class="col-md-3">
+          <input
+            v-model="filtroCor"
+            class="form-control text-center"
+            placeholder="Cor"
+          />
         </div>
 
       </div>
@@ -36,15 +52,27 @@
           <router-link to="/estoque/movimento" class="btn btn-success w-100">
             Entrada/Saída
           </router-link>
-        </div>
+
+          </div>
+
+          <div class="col-auto">
+           <button 
+              class="btn btn-info"
+              @click="abrirHistorico">
+              Histórico de Movimentos
+             </button>
+          </div>
+                
+          </div>
       </div>
-    </div>
+    
 
     <!-- 📋 TABELA -->
     <div v-if="estoques.length" class="container">
       <table class="table table-striped text-center align-middle">
         <thead>
           <tr>
+            <th>Código Produto</th>
             <th>Produto</th>
             <th>Tecido</th>
             <th>Cor</th>
@@ -55,6 +83,7 @@
 
         <tbody>
           <tr v-for="e in estoques" :key="e.id">
+            <th>{{ e.produtoId }}</th>
             <td>{{ e.produtoNome }}</td>
             <td>{{ e.produtoTecido }}</td>
             <td>{{ e.produtoCor }}</td>
@@ -84,7 +113,9 @@ export default {
   data() {
     return {
       estoques: [],
-      filtroSku: "",
+      filtroId: "",
+      filtroTecido: "",
+      filtroCor: "",
       filtroTamanho: "",
       carregado: false,
 
@@ -94,31 +125,39 @@ export default {
 
   methods: {
     async consultar() {
-      LoadingStore.show()
+  LoadingStore.show()
 
-      try {
-        const token = localStorage.getItem("token")
+  try {
+    const token = localStorage.getItem("token")
 
-        const res = await axios.get("http://localhost:8081/estoque/saldos", {
-          params: {
-            sku: this.filtroSku || null,
-            tamanho: this.filtroTamanho || null
-          },
-          headers: { Authorization: token }
-        })
+    const res = await axios.get("http://localhost:8081/estoque/saldos", {
+      params: {
+        idProduto: this.filtroId ? Number(this.filtroId) : null,
+        tamanho: this.filtroTamanho || null,
+        tecido: this.filtroTecido || null,
+        cor: this.filtroCor || null
+      },
+      headers: { Authorization: token }
+    })
 
-        this.estoques = res.data
-        this.carregado = true
+    this.estoques = res.data
+    this.carregado = true
 
-      } catch (error) {
-        console.error(error)
-        this.carregado = false
+  } catch (error) {
+    console.error(error)
+    this.carregado = false
 
-      } finally {
-        LoadingStore.hide()
-      }
-    }
+  } finally {
+    LoadingStore.hide()
   }
+},
+
+abrirHistorico() {
+  window.open('/estoque/movimento/historico', '_blank')
+}
+}
+    
+  
 }
 </script>
 

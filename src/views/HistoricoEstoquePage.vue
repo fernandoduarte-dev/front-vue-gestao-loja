@@ -60,9 +60,14 @@
             </div>
 
             <!-- 🔘 BOTÃO -->
-            <div class="d-flex justify-content-center mt-3">
+            <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+
               <button class="btn btn-primary px-4" @click="buscar">
                 Buscar
+              </button>
+
+              <button class="btn btn-secondary px-4" @click="voltar">
+                Voltar
               </button>
             </div>
 
@@ -75,7 +80,7 @@
 
               <thead>
                 <tr>
-                  <th>Produto</th>
+                  <th>Código Produto</th>
                   <th>Tamanho</th>
                   <th>Qtd</th>
                   <th>Tipo</th>
@@ -86,7 +91,7 @@
 
               <tbody>
                 <tr v-for="m in movimentos" :key="m.id">
-                  <td>{{ m.produtoNome }}</td>
+                  <td>{{ m.produtoId }}</td>
                   <td>{{ m.tamanho }}</td>
                   <td>{{ m.quantidade }}</td>
                   <td>{{ m.tipoMovimento }}</td>
@@ -170,6 +175,10 @@ export default {
       } finally {
         LoadingStore.hide()
       }
+    },
+
+     voltar() {
+      this.$router.push("/estoque")
     },
 
     formatDate(date) {
