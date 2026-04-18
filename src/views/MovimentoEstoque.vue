@@ -67,8 +67,6 @@
                 Voltar
               </button>
 
-        
-
             </div>
 
           </div>
@@ -78,7 +76,7 @@
 
     </div>
 
-    <!-- 🧩 MODAL PRODUTO -->
+    <!-- 🧩 MODAL -->
     <BuscaProdutoModal
       :show="modalProduto"
       @fechar="modalProduto = false"
@@ -87,6 +85,7 @@
 
   </AppLayout>
 </template>
+
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
@@ -105,7 +104,7 @@ export default {
 
   data() {
     return {
-      modalProduto: false,
+      modalProduto: false, // 👈 FIX DO SEU ERRO
 
       tamanhos: ["PP", "P", "M", "G", "GG"],
 
@@ -124,6 +123,7 @@ export default {
     onProdutoSelecionado(produto) {
       this.form.produtoId = produto.id
       this.form.produtoNome = `${produto.nome} - ${produto.cor} - ${produto.tecido}`
+      this.modalProduto = false
     },
 
     async salvar() {
