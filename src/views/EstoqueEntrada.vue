@@ -1,5 +1,5 @@
 <template>
-  <AppLayout titulo="Movimentar Estoque">
+  <AppLayout titulo="Entrada de Estoque">
 
     <div class="container py-4">
 
@@ -28,15 +28,6 @@
 
             </div>
 
-            <!-- 📋 TIPO MOVIMENTO -->
-            <div class="mb-3">
-              <select v-model="form.tipoMovimento" class="form-control text-center">
-                <option value="">Tipo de movimento</option>
-                <option value="ENTRADA">Entrada</option>
-                <option value="SAIDA">Saída</option>
-              </select>
-            </div>
-
             <!-- 📏 TAMANHO -->
             <div class="mb-3">
               <select v-model="form.tamanho" class="form-control text-center">
@@ -60,7 +51,7 @@
             <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
 
               <button class="btn btn-success px-4" @click="salvar">
-                Salvar
+                Confirmar Entrada
               </button>
 
               <button class="btn btn-secondary px-4" @click="voltar">
@@ -86,7 +77,6 @@
   </AppLayout>
 </template>
 
-
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
 import BuscaProdutoModal from "@/components/BuscaProdutoModal.vue"
@@ -95,7 +85,7 @@ import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
 export default {
-  name: "MovimentarEstoquePage",
+  name: "EntradaEstoquePage",
 
   components: {
     AppLayout,
@@ -104,7 +94,7 @@ export default {
 
   data() {
     return {
-      modalProduto: false, // 👈 FIX DO SEU ERRO
+      modalProduto: false,
 
       tamanhos: ["PP", "P", "M", "G", "GG"],
 
@@ -112,71 +102,81 @@ export default {
         produtoId: null,
         produtoNome: "",
         tamanho: "",
-        quantidade: null,
-        tipoMovimento: ""
+        quantidade: null
       }
     }
   },
 
   methods: {
 
+    // 🔹 Selecionar produto
     onProdutoSelecionado(produto) {
       this.form.produtoId = produto.id
       this.form.produtoNome = `${produto.nome} - ${produto.cor} - ${produto.tecido}`
       this.modalProduto = false
     },
 
+    // 🔹 Salvar entrada
     async salvar() {
 
-      if (!this.form.produtoId) return alert("Selecione um produto")
-      if (!this.form.tamanho) return alert("Selecione o tamanho")
-      if (!this.form.quantidade || this.form.quantidade <= 0) return alert("Quantidade inválida")
-      if (!this.form.tipoMovimento) return alert("Selecione o tipo de movimento")
+      if (!this.form.produtoId) {
+        alert("Selecione um produto")
+        return
+      }
+
+      if (!this.form.tamanho) {
+        alert("Selecione o tamanho")
+        return
+      }
+
+      if (!this.form.quantidade || this.form.quantidade <= 0) {
+        alert("Quantidade inválida")
+        return
+      }
 
       LoadingStore.show()
 
       try {
-
         const token = localStorage.getItem("token")
 
-        const url =
-          this.form.tipoMovimento === "ENTRADA"
-            ? "http://localhost:8081/estoque/entrada"
-            : "http://localhost:8081/estoque/saida"
-
-        await axios.post(url, null, {
-          params: {
-            produtoId: this.form.produtoId,
-            tamanho: this.form.tamanho,
-            quantidade: Number(this.form.quantidade)
-          },
-          headers: {
-            Authorization: token
+        await axios.post(
+          "http://localhost:8081/estoque/entrada",
+          null,
+          {
+            params: {
+              produtoId: this.form.produtoId,
+              tamanho: this.form.tamanho,
+              quantidade: Number(this.form.quantidade)
+            },
+            headers: {
+              Authorization: token
+            }
           }
-        })
+        )
 
-        ToastStore.open("Estoque atualizado!", "success")
+        ToastStore.open("Entrada realizada com sucesso!", "success")
 
         this.resetForm()
 
       } catch (error) {
-        ToastStore.open("Erro ao movimentar estoque", "error")
+        ToastStore.open("Erro ao realizar entrada", "error")
       } finally {
         LoadingStore.hide()
       }
     },
 
+    // 🔹 Voltar
     voltar() {
       this.$router.push("/estoque")
     },
 
+    // 🔹 Reset
     resetForm() {
       this.form = {
         produtoId: null,
         produtoNome: "",
         tamanho: "",
-        quantidade: null,
-        tipoMovimento: ""
+        quantidade: null
       }
     }
   }

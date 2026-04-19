@@ -11,7 +11,6 @@
 
             <div class="row g-2">
 
-              <!-- Produto -->
               <div class="col-md-3">
                 <input
                   class="form-control text-center"
@@ -21,7 +20,6 @@
                 />
               </div>
 
-              <!-- Tipo -->
               <div class="col-md-2">
                 <select class="form-control text-center" v-model="filtro.tipoMovimento">
                   <option value="">Tipo</option>
@@ -30,7 +28,6 @@
                 </select>
               </div>
 
-              <!-- Usuário -->
               <div class="col-md-3">
                 <input
                   class="form-control text-center"
@@ -39,7 +36,6 @@
                 />
               </div>
 
-              <!-- Data início -->
               <div class="col-md-2">
                 <input
                   type="date"
@@ -48,7 +44,6 @@
                 />
               </div>
 
-              <!-- Data fim -->
               <div class="col-md-2">
                 <input
                   type="date"
@@ -59,14 +54,16 @@
 
             </div>
 
-            <!-- 🔘 BOTÃO -->
             <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
-
               <button class="btn btn-primary px-4" @click="buscar">
                 Buscar
               </button>
 
-              <button class="btn btn-secondary px-4" @click="voltar">
+              <button class="btn btn-secondary px-4" @click="limpar">
+                Limpar
+              </button>
+
+              <button class="btn btn-dark px-4" @click="voltar">
                 Voltar
               </button>
             </div>
@@ -80,9 +77,8 @@
 
               <thead>
                 <tr>
-                  <th>Código Produto</th>
+                  <th>Produto</th>
                   <th>Tamanho</th>
-                  <th>Qtd</th>
                   <th>Tipo</th>
                   <th>Usuário</th>
                   <th>Data</th>
@@ -90,14 +86,35 @@
               </thead>
 
               <tbody>
+
+                <tr v-if="movimentos.length === 0">
+                  <td colspan="6">Nenhum registro encontrado</td>
+                </tr>
+
                 <tr v-for="m in movimentos" :key="m.id">
                   <td>{{ m.produtoId }}</td>
-                  <td>{{ m.tamanho }}</td>
-                  <td>{{ m.quantidade }}</td>
-                  <td>{{ m.tipoMovimento }}</td>
-                  <td>{{ m.usuarioNome }}</td>
+
+                  <!-- 🔥 fallback pra resolver problema de tamanho -->
+                  <td>{{ m.tamanho || m.itemTamanho || "-" }}</td>
+
+                 
+
+                  <td>
+                    <span
+                      :class="[
+                        'badge',
+                        m.tipoMovimento === 'ENTRADA' ? 'bg-success' : 'bg-danger'
+                      ]"
+                    >
+                      {{ m.tipoMovimento }}
+                    </span>
+                  </td>
+
+                  <td>{{ m.usuarioNome || "-" }}</td>
+
                   <td>{{ formatDate(m.data) }}</td>
                 </tr>
+
               </tbody>
 
             </table>
@@ -128,11 +145,11 @@ export default {
   data() {
     return {
       filtro: {
-        produtoId: null,
-        tipoMovimento: null,
-        usuario: null,
-        dataInicio: null,
-        dataFim: null
+        produtoId: "",
+        tipoMovimento: "",
+        usuario: "",
+        dataInicio: "",
+        dataFim: ""
       },
 
       movimentos: []
@@ -146,29 +163,26 @@ export default {
       LoadingStore.show()
 
       try {
-
         const token = localStorage.getItem("token")
 
-        // 🔥 normalização (EVITA BUG DE "")
-        const params = {
-          produtoId: this.filtro.produtoId || null,
-          tipoMovimento: this.filtro.tipoMovimento || null,
-          usuario: this.filtro.usuario || null,
-          dataInicio: this.filtro.dataInicio || null,
-          dataFim: this.filtro.dataFim || null
-        }
+        // 🔥 REMOVE CAMPOS VAZIOS (ESSENCIAL)
+        const params = {}
 
-        const response = await axios.get(
+        Object.keys(this.filtro).forEach(key => {
+          if (this.filtro[key]) {
+            params[key] = this.filtro[key]
+          }
+        })
+
+        const { data } = await axios.get(
           "http://localhost:8081/estoque/historico",
           {
             params,
-            headers: {
-              Authorization: token
-            }
+            headers: { Authorization: token }
           }
         )
 
-        this.movimentos = response.data
+        this.movimentos = data
 
       } catch (error) {
         ToastStore.open("Erro ao buscar histórico", "error")
@@ -177,7 +191,19 @@ export default {
       }
     },
 
-     voltar() {
+    limpar() {
+      this.filtro = {
+        produtoId: "",
+        tipoMovimento: "",
+        usuario: "",
+        dataInicio: "",
+        dataFim: ""
+      }
+
+      this.buscar()
+    },
+
+    voltar() {
       this.$router.push("/estoque")
     },
 
@@ -189,7 +215,6 @@ export default {
   },
 
   mounted() {
-    // 🔥 já carrega tudo ao abrir a tela
     this.buscar()
   }
 }

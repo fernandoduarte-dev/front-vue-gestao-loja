@@ -9,8 +9,9 @@ import CadastroCliente from '../views/CadastroCliente.vue'
 import ProdutosPage from '../views/ProdutosPage.vue'
 import CadastroProduto from '../views/CadastroProduto.vue'
 import EstoquePage from '@/views/EstoquePage.vue'
-import MovimentoEstoque from '@/views/MovimentoEstoque.vue'
 import HistoricoEstoquePage from '@/views/HistoricoEstoquePage.vue'
+import SaidaItensPage from '../views/SaidaItensPage.vue'
+import EstoqueEntrada from '@/views/EstoqueEntrada.vue'
 
 
 
@@ -33,9 +34,11 @@ const routes = [
 
   { path: '/estoque', component: EstoquePage, meta: { requiresAuth: true }},
 
-  { path: '/estoque/movimento', component: MovimentoEstoque, meta: { requiresAuth: true }},
+  { path: '/estoque/entrada', component: EstoqueEntrada, meta: { requiresAuth: true }},
 
-  { path: '/estoque/movimento/historico', component: HistoricoEstoquePage, meta: { requiresAuth: true }}
+  { path: '/estoque/movimento/historico', component: HistoricoEstoquePage, meta: { requiresAuth: true }},
+
+  { path: '/estoque/saida-itens', component: SaidaItensPage, meta: { requiresAuth: true }}
 ]
 
 const router = createRouter({

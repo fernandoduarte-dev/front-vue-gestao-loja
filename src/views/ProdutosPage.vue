@@ -60,6 +60,7 @@
 
         <thead>
           <tr>
+            <th>Código</th>
             <th>Tipo</th>
             <th>Tecido</th>
             <th>Cor</th>
@@ -69,6 +70,7 @@
 
         <tbody>
           <tr v-for="p in produtos" :key="p.id">
+            <td>{{ p.id }}</td>
             <td>{{ p.nome }}</td>
             <td>{{ p.tecido }}</td>
             <td>{{ p.cor }}</td>
