@@ -34,6 +34,10 @@
   <li class="nav-item mb-2">
     <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/produtos')">Produto</a>
   </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/etiqueta')">Etiqueta</a>
+  </li>
   
 </ul>
         

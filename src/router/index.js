@@ -12,6 +12,7 @@ import EstoquePage from '@/views/EstoquePage.vue'
 import HistoricoEstoquePage from '@/views/HistoricoEstoquePage.vue'
 import SaidaItensPage from '../views/SaidaItensPage.vue'
 import EstoqueEntrada from '@/views/EstoqueEntrada.vue'
+import EtiquetaPage from '../views/EtiquetaPage.vue'
 
 
 
@@ -38,7 +39,9 @@ const routes = [
 
   { path: '/estoque/movimento/historico', component: HistoricoEstoquePage, meta: { requiresAuth: true }},
 
-  { path: '/estoque/saida-itens', component: SaidaItensPage, meta: { requiresAuth: true }}
+  { path: '/estoque/saida-itens', component: SaidaItensPage, meta: { requiresAuth: true }},
+
+  { path: '/etiqueta', component: EtiquetaPage ,meta: { requiresAuth: true }}
 ]
 
 const router = createRouter({
