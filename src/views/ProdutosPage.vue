@@ -3,17 +3,18 @@
 
     <!-- 🔍 FILTROS -->
     <div class="container mb-4">
-      <div class="row justify-content-center mb-3">
 
-       <!-- Nome -->
+      <div class="row justify-content-center mb-3 g-2">
+
+        <!-- Nome -->
         <div class="col-md-3">
           <input
             v-model="filtroNome"
             class="form-control text-center"
-            placeholder="Nome"
+            placeholder="Tipo"
           />
         </div>
-       
+
         <!-- Tecido -->
         <div class="col-md-3">
           <input
@@ -22,7 +23,6 @@
             placeholder="Tecido"
           />
         </div>
-
 
         <!-- Cor -->
         <div class="col-md-3">
@@ -33,49 +33,53 @@
           />
         </div>
 
-       
-
       </div>
 
-      <!-- Botões -->
+      <!-- BOTÕES -->
       <div class="row justify-content-center gap-2">
+
         <div class="col-auto">
-          <button class="btn btn-primary w-100" @click="consultar">
+          <button class="btn btn-primary" @click="consultar">
             Consultar
           </button>
         </div>
 
         <div class="col-auto">
-          <router-link to="/produtos/novo" class="btn btn-success w-100">
+          <router-link to="/produtos/novo" class="btn btn-success">
             Novo Produto
           </router-link>
         </div>
+
       </div>
     </div>
 
     <!-- 📋 TABELA -->
-    <div v-if="produtos.length">
+    <div v-if="produtos.length" class="container">
+
       <table class="table table-striped text-center align-middle">
+
         <thead>
           <tr>
-            <th>Nome</th>
+            <th>Código</th>
+            <th>Tipo</th>
             <th>Tecido</th>
             <th>Cor</th>
-            <th>Venda</th>
-            <th>Locação</th>
+            
           </tr>
         </thead>
 
         <tbody>
           <tr v-for="p in produtos" :key="p.id">
+            <td>{{ p.id }}</td>
             <td>{{ p.nome }}</td>
             <td>{{ p.tecido }}</td>
             <td>{{ p.cor }}</td>
-            <td>R$ {{ p.valorVenda }}</td>
-            <td>R$ {{ p.valorLocacao }}</td>
+            
           </tr>
         </tbody>
+
       </table>
+
     </div>
 
     <p v-else-if="carregado" class="text-center text-muted">
@@ -87,7 +91,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 
 export default {
@@ -97,6 +101,7 @@ export default {
   data() {
     return {
       produtos: [],
+      filtroNome: "",
       filtroTecido: "",
       filtroCor: "",
       carregado: false
@@ -104,31 +109,33 @@ export default {
   },
 
   methods: {
+
+    // 🔹 CONSULTAR PRODUTOS
     async consultar() {
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        const res = await axios.get("http://localhost:8081/produto/buscar", {
+        const { data } = await api.get("/produto/buscar", {
           params: {
+            nome: this.filtroNome || null,
             tecido: this.filtroTecido || null,
             cor: this.filtroCor || null
-          },
-          headers: { Authorization: token }
+          }
         })
 
-        this.produtos = res.data
+        this.produtos = data
         this.carregado = true
 
       } catch (error) {
-        console.error(error)
-        this.carregado = false
+        console.error("Erro ao buscar produtos:", error)
+        this.produtos = []
+        this.carregado = true
 
       } finally {
         LoadingStore.hide()
       }
     }
+
   }
 }
 </script>

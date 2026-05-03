@@ -1,5 +1,5 @@
 <template>
-  <AppLayout titulo="Movimentar Estoque">
+  <AppLayout titulo="Entrada de Estoque">
 
     <div class="container py-4">
 
@@ -28,15 +28,6 @@
 
             </div>
 
-            <!-- 📋 TIPO MOVIMENTO -->
-            <div class="mb-3">
-              <select v-model="form.tipoMovimento" class="form-control text-center">
-                <option value="">Tipo de movimento</option>
-                <option value="ENTRADA">Entrada</option>
-                <option value="SAIDA">Saída</option>
-              </select>
-            </div>
-
             <!-- 📏 TAMANHO -->
             <div class="mb-3">
               <select v-model="form.tamanho" class="form-control text-center">
@@ -60,19 +51,11 @@
             <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
 
               <button class="btn btn-success px-4" @click="salvar">
-                Salvar
+                Confirmar Entrada
               </button>
 
               <button class="btn btn-secondary px-4" @click="voltar">
                 Voltar
-              </button>
-
-              <button
-                class="btn btn-outline-primary px-4"
-                @click="irParaHistorico"
-                
-              >
-                Histórico
               </button>
 
             </div>
@@ -84,7 +67,7 @@
 
     </div>
 
-    <!-- 🧩 MODAL PRODUTO -->
+    <!-- 🧩 MODAL -->
     <BuscaProdutoModal
       :show="modalProduto"
       @fechar="modalProduto = false"
@@ -97,12 +80,12 @@
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
 import BuscaProdutoModal from "@/components/BuscaProdutoModal.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
 export default {
-  name: "MovimentarEstoquePage",
+  name: "EntradaEstoquePage",
 
   components: {
     AppLayout,
@@ -113,83 +96,86 @@ export default {
     return {
       modalProduto: false,
 
-      tamanhos: ["PP", "P", "M", "G", "GG"],
+      tamanhos: [
+        "Único","1","2","4","6","8","10","12","14","16",
+        "36","38","40","42","44","46","48","50","52","54",
+        "56","58","60","62","64","66","68","70","72","74"
+      ],
 
       form: {
         produtoId: null,
         produtoNome: "",
         tamanho: "",
-        quantidade: null,
-        tipoMovimento: ""
+        quantidade: null
       }
     }
   },
 
   methods: {
 
+    // 🔹 Selecionar produto
     onProdutoSelecionado(produto) {
       this.form.produtoId = produto.id
       this.form.produtoNome = `${produto.nome} - ${produto.cor} - ${produto.tecido}`
+      this.modalProduto = false
     },
 
-    async salvar() {
+    // 🔹 Validação simples centralizada
+    validarFormulario() {
+      if (!this.form.produtoId) return "Selecione um produto"
+      if (!this.form.tamanho) return "Selecione o tamanho"
+      if (!this.form.quantidade || this.form.quantidade <= 0) return "Quantidade inválida"
+      return null
+    },
 
-      if (!this.form.produtoId) return alert("Selecione um produto")
-      if (!this.form.tamanho) return alert("Selecione o tamanho")
-      if (!this.form.quantidade || this.form.quantidade <= 0) return alert("Quantidade inválida")
-      if (!this.form.tipoMovimento) return alert("Selecione o tipo de movimento")
+    // 🔹 Salvar entrada
+    async salvar() {
+      const erro = this.validarFormulario()
+
+      if (erro) {
+        ToastStore.open(erro, "error")
+        return
+      }
 
       LoadingStore.show()
 
       try {
-
-        const token = localStorage.getItem("token")
-
-        const url =
-          this.form.tipoMovimento === "ENTRADA"
-            ? "http://localhost:8081/estoque/entrada"
-            : "http://localhost:8081/estoque/saida"
-
-        await axios.post(url, null, {
+        await api.post("/estoque/entrada", null, {
           params: {
             produtoId: this.form.produtoId,
             tamanho: this.form.tamanho,
             quantidade: Number(this.form.quantidade)
-          },
-          headers: {
-            Authorization: token
           }
         })
 
-        ToastStore.open("Estoque atualizado!", "success")
+        ToastStore.open("Entrada realizada com sucesso!", "success")
 
         this.resetForm()
 
       } catch (error) {
-        ToastStore.open("Erro ao movimentar estoque", "error")
+        console.error("Erro ao realizar entrada:", error)
+        ToastStore.open("Erro ao realizar entrada", "error")
+
       } finally {
         LoadingStore.hide()
       }
     },
 
+    // 🔹 Voltar
     voltar() {
       this.$router.push("/estoque")
     },
 
-    irParaHistorico() {
-      this.$router.push("/estoque/movimento/historico")
-    
-    },
-
+    // 🔹 Reset
     resetForm() {
       this.form = {
         produtoId: null,
         produtoNome: "",
         tamanho: "",
-        quantidade: null,
-        tipoMovimento: ""
+        quantidade: null
       }
     }
+
   }
 }
 </script>

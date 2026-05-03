@@ -59,10 +59,8 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios";
-import LoadingStore from '@/store/loading'
-
-
+import api from "@/services/api"
+import LoadingStore from "@/store/loading"
 
 export default {
   name: "UsuariosPage",
@@ -87,31 +85,29 @@ export default {
   },
 
   methods: {
-  async buscarUsuarios() {
-    LoadingStore.show()
 
-    try {
-      const token = localStorage.getItem("token")
+    async buscarUsuarios() {
+      LoadingStore.show()
 
-      const res = await axios.get("http://localhost:8081/usuario/nome", {
-        params: {
-          nome: this.filtroNome
-        },
-        headers: {
-          Authorization: token
-        }
-      })
+      try {
+        const { data } = await api.get("/usuario/nome", {
+          params: {
+            nome: this.filtroNome
+          }
+        })
 
-      this.usuarios = res.data
-      this.carregado = true
+        this.usuarios = data
+        this.carregado = true
 
-    } catch (error) {
-      console.error(error)
-      this.carregado = false
-    } finally {
-      LoadingStore.hide()
+      } catch (error) {
+        console.error(error)
+        this.carregado = false
+
+      } finally {
+        LoadingStore.hide()
+      }
     }
+
   }
- }
 }
 </script>

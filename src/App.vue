@@ -16,7 +16,9 @@
 </template>
 
 <script>
-import LoadingStore from '@/store/loading'
+import { onMounted, computed } from "vue"
+import { useUserStore } from "@/store/user"
+import LoadingStore from "@/store/loading"
 import AppToast from "@/components/AppToast.vue"
 
 export default {
@@ -24,9 +26,21 @@ export default {
     AppToast
   },
 
-  computed: {
-    loading() {
-      return LoadingStore.loading
+  setup() {
+    const userStore = useUserStore()
+
+    const loading = computed(() => LoadingStore.loading)
+
+    onMounted(async () => {
+      const token = localStorage.getItem("token")
+
+      if (token) {
+        await userStore.carregarUsuario()
+      }
+    })
+
+    return {
+      loading
     }
   }
 }

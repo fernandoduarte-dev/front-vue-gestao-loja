@@ -89,7 +89,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 
 export default {
@@ -116,49 +116,47 @@ export default {
   },
 
   methods: {
+
     adicionarTelefone() {
       this.cliente.telefones.push({ ddd: '', numero: '' })
     },
+
     removerTelefone(index) {
       this.cliente.telefones.splice(index, 1)
     },
+
     async cadastrar() {
-  LoadingStore.show()
+      LoadingStore.show()
 
-  try {
-    const token = localStorage.getItem("token")
+      try {
+        await api.post("/cliente", this.cliente)
 
-    await axios.post("http://localhost:8081/cliente", this.cliente, {
-      headers: {
-        Authorization: token
+        this.mensagem = "Cliente cadastrado com sucesso!"
+        this.sucesso = true
+
+        // limpa o formulário
+        this.cliente = {
+          nome: "",
+          cpf: "",
+          rua: "",
+          numero: "",
+          complemento: "",
+          cidade: "",
+          estado: "",
+          cep: "",
+          email: "",
+          telefones: [{ ddd: "", numero: "" }]
+        }
+
+      } catch (error) {
+        console.error(error)
+        this.mensagem = "Erro ao cadastrar cliente."
+        this.sucesso = false
+
+      } finally {
+        LoadingStore.hide()
       }
-    })
-
-    this.mensagem = "Cliente cadastrado com sucesso!"
-    this.sucesso = true
-
-    // limpa o formulário
-    this.cliente = {
-      nome: "",
-      cpf: "",
-      rua: "",
-      numero: "",
-      complemento: "",
-      cidade: "",
-      estado: "",
-      cep: "",
-      email: "",
-      telefones: [{ ddd: "", numero: "" }]
     }
-
-  } catch (error) {
-    console.error(error)
-    this.mensagem = "Erro ao cadastrar cliente."
-    this.sucesso = false
-  } finally {
-    LoadingStore.hide()
-  }
-}
 
   }
 }
