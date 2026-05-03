@@ -87,7 +87,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 import JsBarcode from "jsbarcode"
@@ -110,6 +110,7 @@ export default {
 
   methods: {
 
+    // 🔹 CONSULTAR ETIQUETAS
     async consultar() {
       if (!this.filtro.produtoId) {
         ToastStore.open("Informe o código do produto", "warning")
@@ -119,17 +120,10 @@ export default {
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
+        const { data } = await api.get("/etiquetas", {
+          params: { produtoId: this.filtro.produtoId }
+        })
 
-        const { data } = await axios.get(
-          "http://localhost:8081/etiquetas",
-          {
-            params: { produtoId: this.filtro.produtoId },
-            headers: { Authorization: token }
-          }
-        )
-
-        // 🔥 ORDENA POR MAIS RECENTE
         this.etiquetas = data.sort(
           (a, b) => new Date(b.data) - new Date(a.data)
         )
@@ -137,8 +131,9 @@ export default {
         this.carregado = true
 
       } catch (error) {
-        console.error(error)
+        console.error("Erro ao buscar etiquetas:", error)
         ToastStore.open("Erro ao buscar etiquetas", "error")
+
         this.etiquetas = []
         this.carregado = true
 
@@ -147,62 +142,60 @@ export default {
       }
     },
 
+    // 🔹 FORMATA DATA
     formatarData(data) {
       if (!data) return "-"
       return new Date(data).toLocaleString("pt-BR")
     },
 
-    // 🔥 ETIQUETA INDIVIDUAL
+    // 🔹 GERAR UMA ETIQUETA
     gerarEtiqueta(item) {
+      const janela = this.abrirJanela()
 
-      const janela = window.open("", "", "width=400,height=300")
-
-      if (!janela) {
-        ToastStore.open("Bloqueador de pop-up ativo!", "warning")
-        return
-      }
-
-      const html = `
-        <html>
-          <head>
-            <title>Etiqueta</title>
-            <style>
-              body {
-                font-family: Arial;
-                text-align: center;
-                margin-top: 10px;
-              }
-              svg {
-                margin-top: 5px;
-              }
-            </style>
-          </head>
-          <body>
-            <h4>${item.produtoNome}</h4>
-            <p>SKU: ${item.sku}</p>
-            <p>Tam: ${item.tamanho}</p>
-
-            <svg id="barcode"></svg>
-
-            <p style="font-size:11px;">
-              ${new Date(item.data).toLocaleDateString("pt-BR")}
-            </p>
-          </body>
-        </html>
-      `
+      if (!janela) return
 
       janela.document.open()
-      janela.document.write(html)
+      janela.document.write(this.templateEtiquetaIndividual(item))
       janela.document.close()
 
       setTimeout(() => {
-        const svg = janela.document.getElementById("barcode")
+        this.renderizarBarcodeIndividual(janela, item.sku)
 
-        JsBarcode(svg, item.sku, {
-          format: "CODE128",
-          width: 2,
-          height: 60,
-          displayValue: true
+        janela.focus()
+
+        setTimeout(() => {
+          janela.print()
+          janela.close()
+        }, 500)
+
+      }, 300)
+    },
+
+    // 🔹 IMPRESSÃO EM LOTE
+    imprimirSelecionados() {
+      if (!this.selecionados.length) {
+        ToastStore.open("Selecione pelo menos um item", "warning")
+        return
+      }
+
+      const janela = this.abrirJanela(900, 700)
+
+      if (!janela) return
+
+      janela.document.open()
+      janela.document.write(this.templateLote())
+      janela.document.close()
+
+      setTimeout(() => {
+        this.selecionados.forEach(item => {
+          const svg = janela.document.getElementById(`barcode-${item.sku}`)
+
+          JsBarcode(svg, item.sku, {
+            format: "CODE128",
+            width: 1.2,
+            height: 40,
+            displayValue: false
+          })
         })
 
         janela.focus()
@@ -215,21 +208,48 @@ export default {
       }, 300)
     },
 
-    // 🔥 IMPRESSÃO EM LOTE (COLACRIL)
-    imprimirSelecionados() {
-
-      if (!this.selecionados.length) {
-        ToastStore.open("Selecione pelo menos um item", "warning")
-        return
-      }
-
-      const janela = window.open("", "", "width=900,height=700")
+    // 🔹 ABRIR JANELA
+    abrirJanela(width = 400, height = 300) {
+      const janela = window.open("", "", `width=${width},height=${height}`)
 
       if (!janela) {
         ToastStore.open("Bloqueador de pop-up ativo!", "warning")
-        return
+        return null
       }
 
+      return janela
+    },
+
+    // 🔹 TEMPLATE INDIVIDUAL
+    templateEtiquetaIndividual(item) {
+      return `
+        <html>
+          <head>
+            <title>Etiqueta</title>
+            <style>
+              body {
+                font-family: Arial;
+                text-align: center;
+                margin-top: 10px;
+              }
+              svg { margin-top: 5px; }
+            </style>
+          </head>
+          <body>
+            <h4>${item.produtoNome}</h4>
+            <p>SKU: ${item.sku}</p>
+            <p>Tam: ${item.tamanho}</p>
+            <svg id="barcode"></svg>
+            <p style="font-size:11px;">
+              ${new Date(item.data).toLocaleDateString("pt-BR")}
+            </p>
+          </body>
+        </html>
+      `
+    },
+
+    // 🔹 TEMPLATE LOTE
+    templateLote() {
       const etiquetasHTML = this.selecionados.map(item => `
         <div class="etiqueta">
           <div class="nome">${item.produtoNome}</div>
@@ -242,7 +262,7 @@ export default {
         </div>
       `).join("")
 
-      const html = `
+      return `
         <html>
           <head>
             <style>
@@ -298,32 +318,6 @@ export default {
           </body>
         </html>
       `
-
-      janela.document.open()
-      janela.document.write(html)
-      janela.document.close()
-
-      setTimeout(() => {
-
-        this.selecionados.forEach(item => {
-          const svg = janela.document.getElementById(`barcode-${item.sku}`)
-
-          JsBarcode(svg, item.sku, {
-            format: "CODE128",
-            width: 1.2,
-            height: 40,
-            displayValue: false
-          })
-        })
-
-        janela.focus()
-
-        setTimeout(() => {
-          janela.print()
-          janela.close()
-        }, 500)
-
-      }, 300)
     }
 
   }

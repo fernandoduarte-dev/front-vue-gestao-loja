@@ -58,7 +58,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 
 export default {
@@ -70,8 +70,7 @@ export default {
       produto: {
         nome: "",
         tecido: "",
-        cor: "",
-        
+        cor: ""
       },
       mensagem: "",
       sucesso: false
@@ -84,11 +83,7 @@ export default {
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        await axios.post("http://localhost:8081/produto", this.produto, {
-          headers: { Authorization: token }
-        })
+        await api.post("/produto", this.produto)
 
         this.mensagem = "Produto cadastrado com sucesso!"
         this.sucesso = true
@@ -96,8 +91,7 @@ export default {
         this.produto = {
           nome: "",
           tecido: "",
-          cor: "",
-          
+          cor: ""
         }
 
       } catch (error) {
@@ -109,6 +103,7 @@ export default {
         LoadingStore.hide()
       }
     }
+
   }
 }
 </script>

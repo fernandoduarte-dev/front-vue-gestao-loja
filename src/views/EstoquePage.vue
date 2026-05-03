@@ -162,7 +162,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
@@ -182,7 +182,11 @@ export default {
         cor: ""
       },
 
-      tamanhos: ["PP", "P", "M", "G", "GG"],
+      tamanhos: [
+        "Único","1","2","4","6","8","10","12","14","16",
+        "36","38","40","42","44","46","48","50","52","54",
+        "56","58","60","62","64","66","68","70","72","74"
+      ],
 
       // 🔥 SKUs
       skus: [],
@@ -194,29 +198,25 @@ export default {
 
   methods: {
 
+    // 🔹 CONSULTA ESTOQUE
     async consultar() {
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        const { data } = await axios.get(
-          "http://localhost:8081/estoque/resumo",
-          {
-            params: {
-              idProduto: this.filtro.idProduto || null,
-              tamanho: this.filtro.tamanho || null,
-              tecido: this.filtro.tecido || null,
-              cor: this.filtro.cor || null
-            },
-            headers: { Authorization: token }
+        const { data } = await api.get("/estoque/resumo", {
+          params: {
+            idProduto: this.filtro.idProduto || null,
+            tamanho: this.filtro.tamanho || null,
+            tecido: this.filtro.tecido || null,
+            cor: this.filtro.cor || null
           }
-        )
+        })
 
         this.estoques = data
         this.carregado = true
 
       } catch (error) {
+        console.error("Erro ao consultar estoque:", error)
         ToastStore.open("Erro ao consultar estoque", "error")
         this.estoques = []
         this.carregado = true
@@ -226,33 +226,29 @@ export default {
       }
     },
 
-    // 🔥 CORRIGIDO (AGORA USA PRODUTO + TAMANHO)
+    // 🔹 ABRIR SKUS
     async abrirSkus(produtoId, tamanho) {
       this.modalSkus = true
       this.produtoSelecionado = produtoId
       this.tamanhoSelecionado = tamanho
 
       try {
-        const token = localStorage.getItem("token")
-
-        const { data } = await axios.get(
-          `http://localhost:8081/produto-item/${produtoId}/skus`,
-          {
-            params: {
-              tamanho: tamanho || null
-            },
-            headers: { Authorization: token }
+        const { data } = await api.get(`/produto-item/${produtoId}/skus`, {
+          params: {
+            tamanho: tamanho || null
           }
-        )
+        })
 
         this.skus = data
 
       } catch (error) {
+        console.error("Erro ao buscar SKUs:", error)
         ToastStore.open("Erro ao buscar SKUs", "error")
         this.skus = []
       }
     },
 
+    // 🔹 FECHAR MODAL
     fecharModal() {
       this.modalSkus = false
       this.skus = []
@@ -260,10 +256,12 @@ export default {
       this.tamanhoSelecionado = null
     },
 
+    // 🔹 HISTÓRICO
     abrirHistorico() {
       window.open("/estoque/movimento/historico", "_blank")
     },
 
+    // 🔹 SAÍDA
     irParaSaidaItens() {
       this.$router.push("/estoque/saida-itens")
     }

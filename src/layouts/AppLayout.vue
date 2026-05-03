@@ -8,8 +8,18 @@
         {{ titulo }}
       </div>
 
-      <div class="page-actions d-flex gap-2">
-        <slot name="actions"></slot>
+      <div class="d-flex align-items-center gap-3">
+
+        <!-- 👤 USUÁRIO LOGADO -->
+        <span class="user-name">
+          Olá, {{ userName }}
+        </span>
+
+        <!-- AÇÕES -->
+        <div class="page-actions d-flex gap-2">
+          <slot name="actions"></slot>
+        </div>
+
       </div>
 
     </header>
@@ -23,12 +33,27 @@
 </template>
 
 <script>
+import { computed } from "vue"
+import { useUserStore } from "@/store/user"
+
 export default {
   name: "AppLayout",
   props: {
     titulo: {
       type: String,
       default: ""
+    }
+  },
+
+  setup() {
+    const userStore = useUserStore()
+
+    const userName = computed(() => {
+      return userStore.usuario?.nome || "usuário"
+    })
+
+    return {
+      userName
     }
   }
 }
@@ -50,6 +75,11 @@ export default {
 .page-title {
   font-size: 18px;
   font-weight: 600;
+}
+
+.user-name {
+  font-size: 14px;
+  opacity: 0.9;
 }
 
 .content-area {

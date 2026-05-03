@@ -79,8 +79,8 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
-import LoadingStore from "@/store/loading";
+import api from "@/services/api"
+import LoadingStore from "@/store/loading"
 
 export default {
   name: "CadastroUsuario",
@@ -99,26 +99,28 @@ export default {
   },
 
   methods: {
-    async cadastrar() {
 
+    async cadastrar() {
       LoadingStore.show()
 
-
       try {
-        await axios.post('http://localhost:8081/usuario', this.usuario)
+        await api.post("/usuario", this.usuario)
 
         this.mensagem = 'Usuário cadastrado com sucesso!'
         this.sucesso = true
 
         this.usuario = { nome: '', email: '', senha: '' }
 
-      } catch (e) {
+      } catch (error) {
+        console.error("Erro ao cadastrar usuário:", error)
         this.mensagem = 'Erro ao cadastrar usuário.'
         this.sucesso = false
+
       } finally {
         LoadingStore.hide()
       }
     }
+
   }
 }
 </script>

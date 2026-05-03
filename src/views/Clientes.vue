@@ -4,7 +4,7 @@
     <!-- 🔍 FILTROS -->
     <div class="container mb-4">
       <div class="row justify-content-center mb-3">
-        <!-- Nome -->
+
         <div class="col-md-4">
           <input
             v-model="filtroNome"
@@ -13,7 +13,6 @@
           />
         </div>
 
-        <!-- CPF -->
         <div class="col-md-4">
           <input
             v-model="filtroCpf"
@@ -21,15 +20,16 @@
             placeholder="Buscar por CPF"
           />
         </div>
+
       </div>
 
-      <!-- Botão único -->
       <div class="row justify-content-center gap-2">
         <div class="col-auto">
           <button class="btn btn-primary w-100" @click="consultar">
             Consultar
           </button>
         </div>
+
         <div class="col-auto">
           <router-link to="/clientes/novo" class="btn btn-success w-100">
             Novo Cliente
@@ -49,15 +49,16 @@
             <th>Telefone(s)</th>
           </tr>
         </thead>
+
         <tbody>
           <tr v-for="c in clientes" :key="c.id">
             <td>{{ c.nome }}</td>
             <td>{{ c.cpf }}</td>
             <td>{{ c.email }}</td>
             <td>
-              <span v-for="t in c.telefones" :key="t.id">
-                ({{ t.ddd }}) {{ t.numero }}<br>
-              </span>
+              <div v-for="t in c.telefones" :key="t.id">
+                ({{ t.ddd }}) {{ t.numero }}
+              </div>
             </td>
           </tr>
         </tbody>
@@ -73,8 +74,8 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
 import LoadingStore from "@/store/loading"
+import api from "@/services/api"
 
 export default {
   name: "ClientesPage",
@@ -90,37 +91,39 @@ export default {
   },
 
   methods: {
+
     async consultar() {
-  LoadingStore.show()
-  try {
-    const token = localStorage.getItem("token")
-    let res
+      LoadingStore.show()
 
-    if (this.filtroNome) {
-      res = await axios.get("http://localhost:8081/cliente/nome", {
-        params: { nome: this.filtroNome },
-        headers: { Authorization: token }
-      })
-    } else if (this.filtroCpf) {
-      res = await axios.get("http://localhost:8081/cliente/cpf", {
-        params: { cpf: this.filtroCpf },
-        headers: { Authorization: token }
-      })
-    } else {
-      // 🔑 aqui está o detalhe: consulta com nome vazio
-      res = await axios.get("http://localhost:8081/cliente/nome", {
-        params: { nome: "" },
-        headers: { Authorization: token }
-      })
-    }
+      try {
+        let res
+        const params = {}
 
-    this.clientes = Array.isArray(res.data) ? res.data : [res.data]
-    this.carregado = true
-  } catch (error) {
-    console.error(error)
-    this.carregado = false
-  } finally {
-    LoadingStore.hide()
+        if (this.filtroNome) {
+          params.nome = this.filtroNome
+          res = await api.get("/cliente/nome", { params })
+
+        } else if (this.filtroCpf) {
+          params.cpf = this.filtroCpf
+          res = await api.get("/cliente/cpf", { params })
+
+        } else {
+          params.nome = ""
+          res = await api.get("/cliente/nome", { params })
+        }
+
+        this.clientes = Array.isArray(res.data)
+          ? res.data
+          : [res.data]
+
+        this.carregado = true
+
+      } catch (error) {
+        console.error(error)
+        this.carregado = false
+
+      } finally {
+        LoadingStore.hide()
       }
     }
   }

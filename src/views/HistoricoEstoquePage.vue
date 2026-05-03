@@ -131,7 +131,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
@@ -158,39 +158,42 @@ export default {
 
   methods: {
 
+    // 🔹 BUSCAR HISTÓRICO
     async buscar() {
-
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
+        const params = this.montarParams()
 
-        // 🔥 REMOVE CAMPOS VAZIOS (ESSENCIAL)
-        const params = {}
-
-        Object.keys(this.filtro).forEach(key => {
-          if (this.filtro[key]) {
-            params[key] = this.filtro[key]
-          }
+        const { data } = await api.get("/estoque/historico", {
+          params
         })
-
-        const { data } = await axios.get(
-          "http://localhost:8081/estoque/historico",
-          {
-            params,
-            headers: { Authorization: token }
-          }
-        )
 
         this.movimentos = data
 
       } catch (error) {
+        console.error("Erro ao buscar histórico:", error)
         ToastStore.open("Erro ao buscar histórico", "error")
+
       } finally {
         LoadingStore.hide()
       }
     },
 
+    // 🔹 REMOVE CAMPOS VAZIOS
+    montarParams() {
+      const params = {}
+
+      Object.keys(this.filtro).forEach(key => {
+        if (this.filtro[key]) {
+          params[key] = this.filtro[key]
+        }
+      })
+
+      return params
+    },
+
+    // 🔹 LIMPAR FILTRO
     limpar() {
       this.filtro = {
         produtoId: "",
@@ -203,10 +206,12 @@ export default {
       this.buscar()
     },
 
+    // 🔹 VOLTAR
     voltar() {
       this.$router.push("/estoque")
     },
 
+    // 🔹 FORMATAR DATA
     formatDate(date) {
       if (!date) return ""
       return new Date(date).toLocaleString("pt-BR")

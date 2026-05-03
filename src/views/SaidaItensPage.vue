@@ -87,7 +87,7 @@
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
 import BuscaProdutoModal from "@/components/BuscaProdutoModal.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
@@ -115,89 +115,93 @@ export default {
 
   methods: {
 
-    // 🔹 Selecionar produto
+    // 🔹 SELECIONAR PRODUTO
     onProdutoSelecionado(produto) {
       this.form.produtoId = produto.id
       this.form.produtoNome = `${produto.nome} - ${produto.cor} - ${produto.tecido}`
       this.modalProduto = false
     },
 
-    // 🔹 Buscar itens disponíveis
-    async buscarItens() {
-
+    // 🔹 VALIDAR PRODUTO
+    validarProduto() {
       if (!this.form.produtoId) {
-        alert("Selecione um produto")
-        return
+        ToastStore.open("Selecione um produto", "warning")
+        return false
       }
+      return true
+    },
+
+    // 🔹 BUSCAR ITENS DISPONÍVEIS
+    async buscarItens() {
+      if (!this.validarProduto()) return
 
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        const { data } = await axios.get(
-          "http://localhost:8081/produto-item/disponiveis",
-          {
-            params: { produtoId: this.form.produtoId },
-            headers: { Authorization: token }
+        const { data } = await api.get("/produto-item/disponiveis", {
+          params: {
+            produtoId: this.form.produtoId
           }
-        )
+        })
 
         this.itensDisponiveis = data
 
       } catch (error) {
+        console.error("Erro ao buscar itens:", error)
         ToastStore.open("Erro ao buscar itens", "error")
+
       } finally {
         LoadingStore.hide()
       }
     },
 
-    // 🔹 Confirmar saída
-    async confirmarSaida() {
-
+    // 🔹 VALIDAR SAÍDA
+    validarSaida() {
       if (!this.itensSelecionados.length) {
-        alert("Selecione ao menos um item")
-        return
+        ToastStore.open("Selecione ao menos um item", "warning")
+        return false
       }
+      return true
+    },
+
+    // 🔹 CONFIRMAR SAÍDA
+    async confirmarSaida() {
+      if (!this.validarSaida()) return
 
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        await axios.post(
-          "http://localhost:8081/estoque/saida-itens",
-          this.itensSelecionados,
-          {
-            headers: { Authorization: token }
-          }
-        )
+        await api.post("/estoque/saida-itens", this.itensSelecionados)
 
         ToastStore.open("Saída realizada com sucesso!", "success")
 
         this.resetarTela()
 
       } catch (error) {
+        console.error("Erro ao realizar saída:", error)
         ToastStore.open("Erro ao realizar saída", "error")
+
       } finally {
         LoadingStore.hide()
       }
     },
 
-    // 🔹 Voltar
+    // 🔹 VOLTAR
     voltar() {
       this.$router.push("/estoque")
     },
 
-    // 🔹 Reset
+    // 🔹 RESET TELA
     resetarTela() {
       this.itensDisponiveis = []
       this.itensSelecionados = []
+
       this.form = {
         produtoId: null,
         produtoNome: ""
       }
     }
+
   }
 }
 </script>

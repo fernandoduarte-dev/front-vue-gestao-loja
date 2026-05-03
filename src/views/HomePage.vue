@@ -6,44 +6,44 @@
       
       <div class="text-center mb-4">
         <img src="../assets/logo-branca.png" class="sidebar-logo mb-2" />
-          
       </div>
 
       <ul class="nav flex-column">
-        <ul class="nav flex-column">
-  <li class="nav-item mb-2">
-    <router-link class="nav-link text-white" to="/home">Início</router-link>
-  </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/usuarios')">Usuário</a>
-  </li>
+        <li class="nav-item mb-2">
+          <router-link class="nav-link text-white" to="/home">Início</router-link>
+        </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/pedidos')">Pedido</a>
-  </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/usuarios')">Usuário</a>
+        </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/estoque')">Estoque</a>
-  </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/pedido')">Pedido</a>
+        </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/clientes')">Cliente</a>
-  </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/estoque')">Estoque</a>
+        </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/produtos')">Produto</a>
-  </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/clientes')">Cliente</a>
+        </li>
 
-  <li class="nav-item mb-2">
-    <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/etiqueta')">Etiqueta</a>
-  </li>
-  
-</ul>
-        
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/produtos')">Produto</a>
+        </li>
+
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/etiqueta')">Etiqueta</a>
+        </li>
+
+        <li class="nav-item mb-2">
+          <a class="nav-link text-white" href="#" @click.prevent="abrirNovaAba('/reserva')">Reservas</a>
+        </li>
+
       </ul>
 
-      
     </div>
 
     <!-- Conteúdo -->
@@ -52,22 +52,21 @@
       <!-- Topo -->
       <div class="d-flex justify-content-between align-items-center mb-4">
 
- 
+        <div></div>
 
+        <div class="d-flex align-items-center gap-2">
 
-  <div class="d-flex align-items-center gap-2">
+          <span class="text-muted">
+            Olá, {{ userName || 'Carregando...' }}
+          </span>
 
-    <span class="text-muted">
-      Olá, usuário 👋
-    </span>
+          <button class="btn btn-outline-danger btn-sm" @click="logout">
+            Sair
+          </button>
 
-    <button class="btn btn-outline-danger btn-sm" @click="logout">
-      Sair
-    </button>
+        </div>
 
-  </div>
-
-</div>
+      </div>
 
       <!-- Cards -->
       <div class="row">
@@ -104,11 +103,40 @@
 </template>
 
 <script>
+import { useUserStore } from "../store/user.js"
+
 export default {
   name: 'HomePage',
+
+  data() {
+    return {
+      userStore: null
+    }
+  },
+
+  computed: {
+    userName() {
+      return this.userStore?.usuario?.nome || ""
+    }
+  },
+
+  async mounted() {
+    this.userStore = useUserStore()
+
+    // 🔥 evita chamadas desnecessárias
+    if (!this.userStore.usuario) {
+      await this.userStore.carregarUsuario()
+    }
+  },
+
   methods: {
     logout() {
       localStorage.removeItem('token')
+
+      if (this.userStore) {
+        this.userStore.usuario = null
+      }
+
       this.$router.push('/')
     },
 
@@ -143,5 +171,4 @@ export default {
 .bg-custom {
   background-color: #5e3291; 
 }
-
 </style>

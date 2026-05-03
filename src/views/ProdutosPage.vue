@@ -91,7 +91,7 @@
 
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 
 export default {
@@ -110,22 +110,20 @@ export default {
 
   methods: {
 
+    // 🔹 CONSULTAR PRODUTOS
     async consultar() {
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        const res = await axios.get("http://localhost:8081/produto/buscar", {
+        const { data } = await api.get("/produto/buscar", {
           params: {
             nome: this.filtroNome || null,
             tecido: this.filtroTecido || null,
             cor: this.filtroCor || null
-          },
-          headers: { Authorization: token }
+          }
         })
 
-        this.produtos = res.data
+        this.produtos = data
         this.carregado = true
 
       } catch (error) {
@@ -137,6 +135,7 @@ export default {
         LoadingStore.hide()
       }
     }
+
   }
 }
 </script>

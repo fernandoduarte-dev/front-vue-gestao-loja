@@ -48,45 +48,54 @@
 </template>
 
 <script>
-import axios from 'axios'
-import LoadingStore from '@/store/loading';
+import api from "@/services/api"
+import LoadingStore from "@/store/loading"
+import { useUserStore } from "@/store/user"
 
 export default {
-  name: 'LoginPage',
+  name: "LoginPage",
 
   data() {
     return {
-      email: '',
-      senha: '',
-      erro: ''
+      email: "",
+      senha: "",
+      erro: ""
     }
   },
 
   methods: {
+
     async login() {
-   
-    LoadingStore.show()
+      LoadingStore.show()
+      this.erro = ""
 
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000)) // simula atraso
-        
-        const res = await axios.post("http://localhost:8081/usuario/login", {
+        const { data } = await api.post("/usuario/login", {
           email: this.email,
           senha: this.senha
         })
 
-        const token = res.data.token || res.data
+        const token = data.token || data
 
+        // 🔥 salva token
         localStorage.setItem("token", token)
 
-        this.$router.push("/home")
+        // 🔥 atualiza store de usuário
+        const userStore = useUserStore()
+        await userStore.carregarUsuario()
+
+        // 🔥 redireciona
+        this.$router.replace("/home")
 
       } catch (error) {
+        console.error("Erro login:", error)
         this.erro = "Email ou senha inválidos"
+
       } finally {
-        LoadingStore.hide() // 👈 adiciona isso
-  }
+        LoadingStore.hide()
+      }
     }
+
   }
 }
 </script>

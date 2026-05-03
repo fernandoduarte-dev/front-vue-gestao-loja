@@ -80,7 +80,7 @@
 <script>
 import AppLayout from "@/layouts/AppLayout.vue"
 import BuscaProdutoModal from "@/components/BuscaProdutoModal.vue"
-import axios from "axios"
+import api from "@/services/api"
 import LoadingStore from "@/store/loading"
 import { ToastStore } from "@/store/toast"
 
@@ -96,7 +96,11 @@ export default {
     return {
       modalProduto: false,
 
-      tamanhos: ["PP", "P", "M", "G", "GG"],
+      tamanhos: [
+        "Único","1","2","4","6","8","10","12","14","16",
+        "36","38","40","42","44","46","48","50","52","54",
+        "56","58","60","62","64","66","68","70","72","74"
+      ],
 
       form: {
         produtoId: null,
@@ -116,50 +120,42 @@ export default {
       this.modalProduto = false
     },
 
+    // 🔹 Validação simples centralizada
+    validarFormulario() {
+      if (!this.form.produtoId) return "Selecione um produto"
+      if (!this.form.tamanho) return "Selecione o tamanho"
+      if (!this.form.quantidade || this.form.quantidade <= 0) return "Quantidade inválida"
+      return null
+    },
+
     // 🔹 Salvar entrada
     async salvar() {
+      const erro = this.validarFormulario()
 
-      if (!this.form.produtoId) {
-        alert("Selecione um produto")
-        return
-      }
-
-      if (!this.form.tamanho) {
-        alert("Selecione o tamanho")
-        return
-      }
-
-      if (!this.form.quantidade || this.form.quantidade <= 0) {
-        alert("Quantidade inválida")
+      if (erro) {
+        ToastStore.open(erro, "error")
         return
       }
 
       LoadingStore.show()
 
       try {
-        const token = localStorage.getItem("token")
-
-        await axios.post(
-          "http://localhost:8081/estoque/entrada",
-          null,
-          {
-            params: {
-              produtoId: this.form.produtoId,
-              tamanho: this.form.tamanho,
-              quantidade: Number(this.form.quantidade)
-            },
-            headers: {
-              Authorization: token
-            }
+        await api.post("/estoque/entrada", null, {
+          params: {
+            produtoId: this.form.produtoId,
+            tamanho: this.form.tamanho,
+            quantidade: Number(this.form.quantidade)
           }
-        )
+        })
 
         ToastStore.open("Entrada realizada com sucesso!", "success")
 
         this.resetForm()
 
       } catch (error) {
+        console.error("Erro ao realizar entrada:", error)
         ToastStore.open("Erro ao realizar entrada", "error")
+
       } finally {
         LoadingStore.hide()
       }
@@ -179,6 +175,7 @@ export default {
         quantidade: null
       }
     }
+
   }
 }
 </script>
